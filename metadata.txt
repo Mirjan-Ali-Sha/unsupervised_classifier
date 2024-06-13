@@ -1,0 +1,47 @@
+# This file contains metadata for your plugin.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=Unsupervised Classifier
+qgisMinimumVersion=3.0
+description=Plugin for unsupervised classification of satellite images
+version=0.1
+author=Mirjan Ali Sha
+email=mirjanalisha@gmail.com
+
+about=The Unsupervised Classification Plugin for QGIS is a powerful tool designed to facilitate the classification of satellite images using unsupervised learning algorithms. This plugin provides an easy-to-use interface for loading satellite images and selecting from a variety of unsupervised classification methods, including K-means, ISODATA, and DBSCAN. Key Features: 1. User-Friendly Interface: Intuitive dialog for selecting classification parameters. 2. Multiple Algorithms: Support for K-means, ISODATA, and DBSCAN algorithms. 3. Seamless Integration: Directly integrates with QGIS, allowing for easy access and visualization of classification results. 4. Flexible: Handles different types of satellite images and provides robust classification results. This plugin is ideal for remote sensing professionals, GIS analysts, and researchers looking to perform efficient and accurate unsupervised classification of satellite imagery within the QGIS environment.
+
+tracker=https://github.com/Mirjan-Ali-Sha/unsupervised_classifier/issues
+repository=https://github.com/Mirjan-Ali-Sha/unsupervised_classifier
+# End of mandatory metadata
+
+# Recommended items:
+
+hasProcessingProvider=no
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=processing, raster, remote sensing
+
+homepage=https://github.com/Mirjan-Ali-Sha/unsupervised_classifier/wiki
+category=Raster
+icon=icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
+# Since QGIS 3.8, a comma separated list of plugins to be installed
+# (or upgraded) can be specified.
+# Check the documentation for more information.
+# plugin_dependencies=
+
+Category of the plugin: Raster, Vector, Database or Web
+# category=
+
+# If the plugin can run on QGIS Server.
+server=False
+
