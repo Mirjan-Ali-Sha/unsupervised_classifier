@@ -23,7 +23,7 @@ class UnsupervisedClassifier:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-        icon_path = ':/icon.png'
+        icon_path = ':cluster.png'
         self.toolbar = self.iface.addToolBar(u'Unsupervised Classifier')
         self.toolbar.setObjectName("Unsupervised Classifier")
 
