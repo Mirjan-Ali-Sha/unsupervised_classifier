@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_ClassifyDialogBase(object):
     def setupUi(self, ClassifyDialogBase):
         ClassifyDialogBase.setObjectName("ClassifyDialogBase")
-        ClassifyDialogBase.resize(400, 300)
+        ClassifyDialogBase.resize(600, 400)
         self.verticalLayout = QtWidgets.QVBoxLayout(ClassifyDialogBase)
         self.verticalLayout.setObjectName("verticalLayout")
         self.algorithmComboBox = QtWidgets.QComboBox(ClassifyDialogBase)

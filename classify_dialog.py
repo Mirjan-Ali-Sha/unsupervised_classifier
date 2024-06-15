@@ -14,7 +14,8 @@ class UnsupervisedClassifierDialog(QDialog):
         super().__init__(parent)
         self.iface = iface
         self.setWindowTitle("Unsupervised Classifier")
-        self.setGeometry(100, 100, 400, 400)
+        self.setGeometry(100, 100, 600, 400)  # Set the window wider
+        self.setWindowModality(Qt.ApplicationModal)  # Keep the dialog on top until it is closed
 
         self.layout = QVBoxLayout(self)
 
@@ -44,8 +45,8 @@ class UnsupervisedClassifierDialog(QDialog):
         self.algorithmLabel = QLabel("Select Clustering Method:", self)
         self.layout.addWidget(self.algorithmLabel)
         self.algorithmComboBox = QComboBox(self)
-        self.algorithmComboBox.addItem("Kmeans (Best Method)")
-        self.algorithmComboBox.addItem("ISODATA (Time Taking)")
+        self.algorithmComboBox.addItem("Kmeans (Best & Fast Method)")
+        self.algorithmComboBox.addItem("ISODATA (Complex & Time Taking)")
         self.layout.addWidget(self.algorithmComboBox)
 
         # Number of clusters
@@ -126,11 +127,35 @@ class UnsupervisedClassifierDialog(QDialog):
         self.populate_band_options()
         self.isodataOptionsGroupBox.hide()  # Hide ISODATA options by default
 
+    def showEvent(self, event):
+        # Reset all values when the dialog is shown
+        self.reset_values()
+        super().showEvent(event)
+
+    def reset_values(self):
+        self.inputFileLineEdit.clear()
+        self.outputFileLineEdit.clear()
+        self.algorithmComboBox.setCurrentIndex(0)
+        self.numClustersSpinBox.setValue(5)
+        self.maxIterSpinBox.setValue(100)
+        self.maxMergeDoubleSpinBox.setValue(0.5)
+        self.minSplitStdDoubleSpinBox.setValue(0.5)
+        self.maxStdDoubleSpinBox.setValue(1.0)
+        self.minSamplesSpinBox.setValue(10)
+        self.useNumBandsCheckBox.setChecked(False)
+        self.numBandsSpinBox.setValue(4)
+        self.selectedBandsListWidget.clear()
+        self.openInQgisCheckBox.setChecked(False)
+        self.isodataOptionsGroupBox.hide()
+        self.toggle_band_selection()
+        self.adjustSize()
+
     def toggle_options(self):
-        if self.algorithmComboBox.currentText() == "ISODATA (Time Taking)":
+        if self.algorithmComboBox.currentText() == "ISODATA (Complex & Time Taking)":
             self.isodataOptionsGroupBox.show()
         else:
             self.isodataOptionsGroupBox.hide()
+        self.adjustSize()
 
     def toggle_band_selection(self):
         if self.useNumBandsCheckBox.isChecked():
@@ -139,6 +164,7 @@ class UnsupervisedClassifierDialog(QDialog):
         else:
             self.numBandsSpinBox.show()
             self.selectedBandsListWidget.hide()
+        self.adjustSize()
 
     def populate_band_options(self):
         self.selectedBandsListWidget.clear()
@@ -185,8 +211,8 @@ class UnsupervisedClassifierDialog(QDialog):
 #         self.layout = QVBoxLayout(self)
         
 #         self.algorithmComboBox = QComboBox(self)
-#         self.algorithmComboBox.addItem("Kmeans (Best Method)")
-#         self.algorithmComboBox.addItem("ISODATA (Time Taking)")
+#         self.algorithmComboBox.addItem("Kmeans (Best & Fast Method)")
+#         self.algorithmComboBox.addItem("ISODATA (Complex & Time Taking)")
 #         self.layout.addWidget(self.algorithmComboBox)
         
 #         self.numClustersSpinBox = QSpinBox(self)
@@ -251,7 +277,7 @@ class UnsupervisedClassifierDialog(QDialog):
 #         self.populate_band_options()
 
 #     def toggle_options(self):
-#         if self.algorithmComboBox.currentText() == "ISODATA (Time Taking)":
+#         if self.algorithmComboBox.currentText() == "ISODATA (Complex & Time Taking)":
 #             self.isodataOptionsGroupBox.setEnabled(True)
 #         else:
 #             self.isodataOptionsGroupBox.setEnabled(False)
@@ -270,8 +296,8 @@ class UnsupervisedClassifierDialog(QDialog):
 #         uic.loadUi(os.path.join(os.path.dirname(__file__), 'classify_dialog_base.ui'), self)
         
 #         # Populate the algorithm combo box
-#         self.algorithmComboBox.addItem("Kmeans (Best Method)")
-#         self.algorithmComboBox.addItem("ISODATA (Time Taking)")
+#         self.algorithmComboBox.addItem("Kmeans (Best & Fast Method)")
+#         self.algorithmComboBox.addItem("ISODATA (Complex & Time Taking)")
         
 #         # Connect signals for enabling/disabling options based on selected algorithm
 #         self.algorithmComboBox.currentIndexChanged.connect(self.toggle_options)
@@ -282,7 +308,7 @@ class UnsupervisedClassifierDialog(QDialog):
 #         self.populate_band_options()
 
 #     def toggle_options(self):
-#         if self.algorithmComboBox.currentText() == "ISODATA (Time Taking)":
+#         if self.algorithmComboBox.currentText() == "ISODATA (Complex & Time Taking)":
 #             self.isodataOptionsGroupBox.setEnabled(True)
 #         else:
 #             self.isodataOptionsGroupBox.setEnabled(False)
@@ -308,8 +334,8 @@ class UnsupervisedClassifierDialog(QDialog):
 #         uic.loadUi(os.path.join(os.path.dirname(__file__), 'classify_dialog_base.ui'), self)
         
 #         # Populate the algorithm combo box
-#         self.algorithmComboBox.addItem("Kmeans (Best Method)")
-#         self.algorithmComboBox.addItem("ISODATA (Time Taking)")
+#         self.algorithmComboBox.addItem("Kmeans (Best & Fast Method)")
+#         self.algorithmComboBox.addItem("ISODATA (Complex & Time Taking)")
         
 #         # Connect signals for enabling/disabling options based on selected algorithm
 #         self.algorithmComboBox.currentIndexChanged.connect(self.toggle_options)
@@ -320,7 +346,7 @@ class UnsupervisedClassifierDialog(QDialog):
 #         self.populate_band_options()
 
 #     def toggle_options(self):
-#         if self.algorithmComboBox.currentText() == "ISODATA (Time Taking)":
+#         if self.algorithmComboBox.currentText() == "ISODATA (Complex & Time Taking)":
 #             self.isodataOptionsGroupBox.setEnabled(True)
 #         else:
 #             self.isodataOptionsGroupBox.setEnabled(False)

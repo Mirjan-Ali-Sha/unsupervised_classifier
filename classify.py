@@ -22,13 +22,16 @@ class UnsupervisedClassifier:
         return QCoreApplication.translate('UnsupervisedClassifier', message)
 
     def initGui(self):
-        icon_path = ':/icon.png'  # Ensure this path matches your qrc prefix and filename
-        self.add_action(
-            icon_path,
-            text=self.tr(u'Unsupervised Classifier'),
-            callback=self.run,
-            parent=self.iface.mainWindow()
-        )
+        """Create the menu entries and toolbar icons inside the QGIS GUI."""
+        icon_path = ':/icon.png'
+        self.toolbar = self.iface.addToolBar(u'Unsupervised Classifier')
+        self.toolbar.setObjectName("Unsupervised Classifier")
+
+        self.action_UnspvClassification = QAction(QIcon(icon_path), u"Unsupervised Classifier", self.iface.mainWindow())
+        self.action_UnspvClassification.triggered.connect(self.run)
+        self.iface.addPluginToRasterMenu(u"&Unsupervised Classifier", self.action_UnspvClassification)
+        
+        self.toolbar.addActions([self.action_UnspvClassification])
 
     def add_action(
         self,
@@ -61,8 +64,12 @@ class UnsupervisedClassifier:
         for action in self.actions:
             self.iface.removePluginMenu(self.tr(u'&Unsupervised Classifier'), action)
             self.iface.removeToolBarIcon(action)
+        del self.toolbar
 
     def run(self):
+        if not hasattr(self, 'dlg'):
+            self.dlg = UnsupervisedClassifierDialog(iface=self.iface, parent=self.iface.mainWindow())
+            self.dlg.runButton.clicked.connect(self.run_clustering)
         self.dlg.show()
         result = self.dlg.exec_()
         if result:
@@ -89,9 +96,9 @@ class UnsupervisedClassifier:
         reshaped_data = np.stack(bands_data, axis=-1).reshape(-1, len(selected_bands))
         reshaped_data = clean_data(reshaped_data)
         
-        if clustering_method == 'Kmeans (Best Method)':
+        if clustering_method == 'Kmeans (Best & Fast Method)':
             centroids, labels = kmeans2(whiten(reshaped_data), num_clusters, minit='points')
-        elif clustering_method == 'ISODATA (Time Taking)':
+        elif clustering_method == 'ISODATA (Complex & Time Taking)':
             centroids, labels = isodata_clustering(whiten(reshaped_data), num_clusters, max_iter, max_merge, min_split_std, max_std, min_samples)
         
         clustered_image = labels.reshape(nrows, ncols).astype(np.uint8)
@@ -107,6 +114,8 @@ class UnsupervisedClassifier:
 
         if open_in_qgis:
             self.iface.addRasterLayer(output_file, "Clustered Image")
+
+        QMessageBox.information(self.dlg, "Clustering Completed", "The clustering process has been completed successfully.")
 
 # Clustering algorithms
 def clean_data(data):
@@ -139,11 +148,15 @@ def isodata_clustering(data, num_clusters, max_iter, max_merge, min_split_std, m
                 new_centroids.append(mean1)
         final_centroids = []
         for mean in new_centroids:
-            if np.any(np.std(data[labels == mean], axis=0) > max_std):
-                final_centroids.append(mean + std1 / 2)
-                final_centroids.append(mean - std1 / 2)
-            else:
-                final_centroids.append(mean)
+            try:
+                cluster_points = data[labels == np.argmin(cdist(data, [mean]), axis=1)]
+                if np.any(np.std(cluster_points, axis=0) > max_std):
+                    final_centroids.append(mean + std1 / 2)
+                    final_centroids.append(mean - std1 / 2)
+                else:
+                    final_centroids.append(mean)
+            except FloatingPointError:
+                pass
         centroids = np.array(final_centroids)
         distances = cdist(data, centroids, metric='euclidean')
         labels = np.argmin(distances, axis=1)
@@ -243,9 +256,9 @@ def isodata_clustering(data, num_clusters, max_iter, max_merge, min_split_std, m
 #         reshaped_data = np.stack(bands_data, axis=-1).reshape(-1, len(selected_bands))
 #         reshaped_data = clean_data(reshaped_data)
         
-#         if clustering_method == 'Kmeans (Best Method)':
+#         if clustering_method == 'Kmeans (Best & Fast Method)':
 #             centroids, labels = kmeans2(whiten(reshaped_data), num_clusters, minit='points')
-#         elif clustering_method == 'ISODATA (Time Taking)':
+#         elif clustering_method == 'ISODATA (Complex & Time Taking)':
 #             centroids, labels = isodata_clustering(whiten(reshaped_data), num_clusters, max_iter, max_merge, min_split_std, max_std, min_samples)
         
 #         clustered_image = labels.reshape(nrows, ncols).astype(np.uint8)
@@ -397,9 +410,9 @@ def isodata_clustering(data, num_clusters, max_iter, max_merge, min_split_std, m
 #         reshaped_data = np.stack(bands_data, axis=-1).reshape(-1, len(selected_bands))
 #         reshaped_data = clean_data(reshaped_data)
         
-#         if clustering_method == 'Kmeans (Best Method)':
+#         if clustering_method == 'Kmeans (Best & Fast Method)':
 #             centroids, labels = kmeans2(whiten(reshaped_data), num_clusters, minit='points')
-#         elif clustering_method == 'ISODATA (Time Taking)':
+#         elif clustering_method == 'ISODATA (Complex & Time Taking)':
 #             centroids, labels = isodata_clustering(whiten(reshaped_data), num_clusters, max_iter, max_merge, min_split_std, max_std, min_samples)
         
 #         clustered_image = labels.reshape(nrows, ncols).astype(np.uint8)
