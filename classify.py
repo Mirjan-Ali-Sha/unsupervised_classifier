@@ -2,7 +2,7 @@ import os
 import numpy as np
 from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QFileDialog, QMessageBox
+from qgis.PyQt.QtWidgets import QAction, QFileDialog, QMessageBox, QToolBar
 from qgis.core import QgsProject, QgsRasterLayer
 from osgeo import gdal, osr
 from scipy.cluster.vq import kmeans2, whiten
@@ -15,56 +15,48 @@ class UnsupervisedClassifier:
         self.iface = iface
         self.plugin_dir = os.path.dirname(__file__)
         self.actions = []
-        self.menu = self.tr(u'&Unsupervised Classifier')
+        self.menu = self.tr(u'&MAS Raster Processing')  # Common menu name
+        self.toolbar = None
         self.first_start = None
 
     def tr(self, message):
         return QCoreApplication.translate('UnsupervisedClassifier', message)
 
     def initGui(self):
-        """Create the menu entries and toolbar icons inside the QGIS GUI."""
-        icon_path = ':cluster.png'
-        self.toolbar = self.iface.addToolBar(u'Unsupervised Classifier')
-        self.toolbar.setObjectName("Unsupervised Classifier")
+        icon_path = ':/cluster.png'
+        # Check if the toolbar already exists, if not create it
+        self.toolbar = self.iface.mainWindow().findChild(QToolBar, 'MASRasterProcessingToolbar')
+        if self.toolbar is None:
+            self.toolbar = self.iface.addToolBar(u'MAS Raster Processing')
+            self.toolbar.setObjectName('MASRasterProcessingToolbar')
 
-        self.action_UnspvClassification = QAction(QIcon(icon_path), u"Unsupervised Classifier", self.iface.mainWindow())
+        self.action_UnspvClassification = QAction(QIcon(icon_path), u"&Unsupervised Classifier", self.iface.mainWindow())
         self.action_UnspvClassification.triggered.connect(self.run)
-        self.iface.addPluginToRasterMenu(u"&Unsupervised Classifier", self.action_UnspvClassification)
-        
-        self.toolbar.addActions([self.action_UnspvClassification])
+        self.iface.addPluginToRasterMenu(self.menu, self.action_UnspvClassification)
+        self.toolbar.addAction(self.action_UnspvClassification)
+        self.actions.append(self.action_UnspvClassification)
 
-    def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None
-    ):
-        self.dlg = UnsupervisedClassifierDialog(iface=self.iface, parent=self.iface.mainWindow())
-        self.dlg.runButton.clicked.connect(self.run_clustering)
-
+    def add_action(self, icon_path, text, callback, enabled_flag=True, add_to_menu=True, add_to_toolbar=True, status_tip=None, whats_this=None, parent=None):
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
         action.setEnabled(enabled_flag)
-        
+
         if add_to_toolbar:
-            self.iface.addToolBarIcon(action)
+            self.toolbar.addAction(action)
         if add_to_menu:
-            self.iface.addPluginToMenu(self.menu, action)
+            self.iface.addPluginToRasterMenu(self.menu, action)
         self.actions.append(action)
         return action
 
     def unload(self):
         for action in self.actions:
-            self.iface.removePluginMenu(self.tr(u'&Unsupervised Classifier'), action)
+            self.iface.removePluginMenu(self.tr(u'&MAS Raster Processing'), action)
             self.iface.removeToolBarIcon(action)
-        del self.toolbar
+        if self.toolbar:
+            del self.toolbar
+
+
 
     def run(self):
         if not hasattr(self, 'dlg'):
